@@ -1,14 +1,12 @@
 package com.condominium.online.condo.repository;
 
 import com.condominium.online.condo.entity.Dweller;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
-public interface DwellerRepository extends RepositoryBehavior<Dweller>{
+public interface DwellerJPARepository extends JpaRepository<Dweller, Long> {
 
     void delete(long id);
 
     boolean exists(long id);
 
-    List<Dweller> findAll();
 }

@@ -31,9 +31,6 @@ plugins {
     id "com.jfrog.artifactory" version "4.4.12"
     id "org.asciidoctor.convert" version "1.5.3"
 
-    // Lombok
-    id 'io.franzbecker.gradle-lombok' version '1.8'
-
     //Sonarqube
     id "org.sonarqube" version "2.5"
 }
@@ -64,6 +61,8 @@ dependencyManagement {
 
 dependencies {
 
+    compile(group: 'com.h2database', name: 'h2', version: '1.3.148')
+
     //Eureka Server
     compile('org.springframework.cloud:spring-cloud-starter-netflix-eureka-server')
     testCompile('org.springframework.boot:spring-boot-starter-test')
@@ -72,8 +71,8 @@ dependencies {
     testCompile(group: 'org.easymock', name: 'easymock', version: '3.5')
 
     // Swagger dependencies
-    compile group: 'io.springfox', name: 'springfox-swagger2', version: "${project.ext['swaggerVersion']}", transitive: true
-    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: "${project.ext['swaggerVersion']}", transitive: true
+    compile(group: 'io.springfox', name: 'springfox-swagger2', version: "${project.ext['swaggerVersion']}", transitive: true)
+    compile(group: 'io.springfox', name: 'springfox-swagger-ui', version: "${project.ext['swaggerVersion']}", transitive: true)
 
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
     compile('org.springframework.boot:spring-boot-starter-web')

@@ -3,137 +3,166 @@ package com.condominium.online.condo.service;
 import com.condominium.online.condo.entity.Dweller;
 import com.condominium.online.condo.exceptions.InvalidUserException;
 import com.condominium.online.condo.repository.DwellerRepository;
+import com.condominium.online.condo.repository.impl.DwellerRepositoryImpl;
+import com.condominium.online.condo.service.dweller.DwellerService;
+import com.condominium.online.condo.service.dweller.impl.DwellerServiceImpl;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.ArgumentCaptor;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Optional;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest(classes = { DwellerRepositoryImpl.class, DwellerServiceImpl.class })
 public class DwellerServiceTest {
 
-    private static final String DWELLER1_NAME = "Godzilla";
-    private static final String DWELLER1_CPF = "36724476925";
-    private static final String DWELLER1_APARTMENT_NUMBER = "68C";
-    private Dweller dweller1;
+    private static final String DWELLER_NAME = "Godzilla";
+    private static final String DWELLER_CPF = "36724476925";
+    private static final String DWELLER_APARTMENT_NUMBER = "68C";
+    private Dweller dweller;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    @InjectMocks
-    private DwellerService registerDwellerService;
 
-    @Mock
+    @MockBean
     private DwellerRepository dwellerRepository;
 
+    @Autowired
+    private DwellerService dwellerService;
+
+
     @Before
-    public void setUp(){
+    public void setUp() {
+
         MockitoAnnotations.initMocks(this);
-        dweller1 = new Dweller(DWELLER1_NAME, DWELLER1_CPF, DWELLER1_APARTMENT_NUMBER);
+        dweller = new Dweller(DWELLER_NAME, DWELLER_CPF, DWELLER_APARTMENT_NUMBER);
     }
 
     @Test
-    public void whenSaveDwellerThenReturnSavedDweller() throws Exception{
-        when(dwellerRepository.save(dweller1)).thenReturn(Optional.ofNullable(dweller1));
+    public void whenSaveDwellerThenReturnSavedDweller() throws Exception {
 
-        Dweller savedDweller = registerDwellerService.saveDweller(dweller1);
-
-        assertEquals(savedDweller.getName(), DWELLER1_NAME);
-        assertEquals(savedDweller.getCpf(), DWELLER1_CPF);
-        assertEquals(savedDweller.getApartmentNumber(), DWELLER1_APARTMENT_NUMBER);
+        dwellerService.insert(dweller);
+        verify(dwellerRepository, atLeastOnce()).save(dweller);
     }
 
     @Test
-    public void whenSaveDwellerWithNullNameThenReturnInvalidUserException() throws Exception{
-        dweller1.setName(null);
+    public void whenSaveDwellerWithNullNameThenReturnInvalidUserException() throws Exception {
 
+        dweller.setName(null);
+
+        doThrow(new InvalidUserException("Invalid Name")).when(dwellerRepository).save(dweller);
         expectedException.expect(InvalidUserException.class);
         expectedException.expectMessage("Invalid Name");
 
-        registerDwellerService.saveDweller(dweller1);
+        dwellerService.insert(dweller);
     }
 
     @Test
-    public void whenSaveDwellerWithEmptyNameThenReturnInvalidUserException() throws Exception{
-        dweller1.setName("");
+    public void whenSaveDwellerWithEmptyNameThenReturnInvalidUserException() throws Exception {
 
+        dweller.setName("");
+
+        doThrow(new InvalidUserException("Invalid Name")).when(dwellerRepository).save(dweller);
         expectedException.expect(InvalidUserException.class);
         expectedException.expectMessage("Invalid Name");
 
-        registerDwellerService.saveDweller(dweller1);
+        dwellerService.insert(dweller);
     }
 
     @Test
-    public void whenSaveDwellerWithNullCPFThenReturnInvalidUserException() throws Exception{
-        dweller1.setCpf(null);
+    public void whenSaveDwellerWithNullCPFThenReturnInvalidUserException() throws Exception {
 
+        dweller.setCpf(null);
+
+        doThrow(new InvalidUserException("Invalid CPF")).when(dwellerRepository).save(dweller);
+                expectedException.expect(InvalidUserException.class);
+        expectedException.expectMessage("Invalid CPF");
+
+        dwellerService.insert(dweller);
+    }
+
+
+    @Test
+    public void whenSaveDwellerWithEmptyCPFThenReturnInvalidUserException() throws Exception {
+
+        dweller.setCpf("");
+
+        doThrow(new InvalidUserException("Invalid CPF")).when(dwellerRepository).save(dweller);
         expectedException.expect(InvalidUserException.class);
         expectedException.expectMessage("Invalid CPF");
 
-        registerDwellerService.saveDweller(dweller1);
+        dwellerService.insert(dweller);
     }
 
     @Test
-    public void whenSaveDwellerWithEmptyCPFThenReturnInvalidUserException() throws Exception{
-        dweller1.setCpf("");
+    public void whenSavingDwellerWithNullApartmentThenReturnInvalidUserException() throws Exception {
 
-        expectedException.expect(InvalidUserException.class);
-        expectedException.expectMessage("Invalid CPF");
+        dweller.setApartmentNumber(null);
 
-        registerDwellerService.saveDweller(dweller1);
-    }
-
-    @Test
-    public void whenSavingDwellerWithNullApartmentThenReturnInvalidUserException() throws Exception{
-        dweller1.setApartmentNumber(null);
-
+        doThrow(new InvalidUserException("Invalid apartment")).when(dwellerRepository).save(dweller);
         expectedException.expect(InvalidUserException.class);
         expectedException.expectMessage("Invalid apartment");
 
-        registerDwellerService.saveDweller(dweller1);
+        dwellerService.insert(dweller);
     }
 
     @Test
-    public void whenSavingDwellerWithEmptyApartmentThenReturnInvalidUserException() throws Exception{
-        dweller1.setApartmentNumber("");
+    public void whenSavingDwellerWithEmptyApartmentThenReturnInvalidUserException() throws Exception {
 
+        dweller.setApartmentNumber("");
+
+        doThrow(new InvalidUserException("Invalid apartment")).when(dwellerRepository).save(dweller);
         expectedException.expect(InvalidUserException.class);
         expectedException.expectMessage("Invalid apartment");
 
-        registerDwellerService.saveDweller(dweller1);
+        dwellerService.insert(dweller);
     }
 
     @Test
-    public void whenRemovingExistingUserThenReturnSuccessful() throws InvalidUserException{
-        dweller1.setId(123);
+    public void whenRemovingExistingUserThenReturnSuccessful() throws InvalidUserException {
 
-        when(dwellerRepository.exists(dweller1.getId())).thenReturn(true);
-        doNothing().when(dwellerRepository).delete(dweller1.getId());
+        dweller.setId(123);
 
-        registerDwellerService.deleteDweller(dweller1.getId());
+        when(dwellerRepository.exists(dweller.getId())).thenReturn(true);
+        doNothing().when(dwellerRepository)
+                   .delete(dweller.getId());
 
-        verify(dwellerRepository).delete(123);
+        dwellerService.delete(String.valueOf(dweller.getId()));
+
+        verify(dwellerRepository, atLeastOnce()).delete(123);
     }
 
     @Test
-    public void whenRemovingNonExistingUserIdThenReturnInvalidUserException() throws InvalidUserException{
-        dweller1.setId(0);
+    public void whenRemovingNonExistingUserIdThenReturnInvalidUserException() throws InvalidUserException {
+
+        dweller.setId(0);
 
         expectedException.expect(InvalidUserException.class);
         expectedException.expectMessage("No such user");
 
-        when(dwellerRepository.exists(dweller1.getId())).thenReturn(false);
-        doNothing().when(dwellerRepository).delete(dweller1.getId());
+        when(dwellerRepository.exists(dweller.getId())).thenReturn(false);
+        doNothing().when(dwellerRepository)
+                   .delete(dweller.getId());
 
-        registerDwellerService.deleteDweller(dweller1.getId());
+        dwellerService.delete(String.valueOf(dweller.getId()));
     }
 }
